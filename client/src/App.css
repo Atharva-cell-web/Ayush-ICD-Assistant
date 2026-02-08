@@ -1,6 +1,6 @@
 :root {
-  --primary-teal: #10b981;  /* Ayurveda Green */
-  --primary-blue: #3b82f6;  /* ICD Blue */
+  --primary-teal: #10b981;
+  --primary-blue: #3b82f6;
   --bg-color: #f3f4f6;
   --text-dark: #1f2937;
   --text-light: #6b7280;
@@ -14,13 +14,18 @@ body {
 }
 
 .app-container {
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
   padding: 2rem;
   min-height: 100vh;
 }
 
-/* Navbar Styling */
+.page-loading {
+  text-align: center;
+  color: #6b7280;
+  padding: 3rem 0;
+}
+
 .navbar {
   display: flex;
   justify-content: space-between;
@@ -28,116 +33,75 @@ body {
   margin-bottom: 3rem;
   padding-bottom: 1rem;
   border-bottom: 2px solid #e5e7eb;
-}
-
-.logo span { font-weight: 800; font-size: 1.5rem; }
-.logo .green { color: var(--primary-teal); }
-.logo .blue { color: var(--primary-blue); }
-
-/* Search Bar Styling */
-.search-container { position: relative; margin-bottom: 2rem; }
-
-.search-input {
-  width: 100%;
-  padding: 1.2rem;
-  font-size: 1.1rem;
-  border: 2px solid transparent;
-  border-radius: 12px;
-  background: white;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  outline: none;
-  box-sizing: border-box; /* Prevents padding from breaking layout */
-}
-
-.search-input:focus {
-  border-color: var(--primary-blue);
-}
-
-.suggestions-box {
-  position: absolute;
-  top: 110%;
-  left: 0;
-  right: 0;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  z-index: 100;
-  overflow: hidden;
-}
-
-.suggestion-item {
-  padding: 1rem;
-  cursor: pointer;
-  border-bottom: 1px solid #f3f4f6;
-}
-.suggestion-item:hover { background: #f9fafb; }
-
-/* Result Card Styling */
-.result-card {
-  background: white;
-  border-radius: 16px;
-  padding: 2rem;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-  animation: slideUp 0.4s ease-out;
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-}
-
-.confidence-badge {
-  background: #ecfdf5;
-  color: var(--primary-teal);
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  font-weight: 600;
-}
-
-.codes-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
-  margin-bottom: 2rem;
 }
 
-.code-box {
-  padding: 1.5rem;
-  border-radius: 12px;
-  color: white;
-  text-align: center;
-}
-.code-box.ayush { background: linear-gradient(135deg, #10b981, #059669); }
-.code-box.icd { background: linear-gradient(135deg, #3b82f6, #2563eb); }
-.code-box h3 { margin: 0; opacity: 0.9; font-size: 0.9rem; }
-.code-box p { font-size: 1.8rem; font-weight: 700; margin: 5px 0 0 0; }
-
-.description {
-  color: var(--text-light);
-  line-height: 1.6;
-  font-size: 1.1rem;
-  border-left: 4px solid var(--primary-blue);
-  padding-left: 1rem;
-  margin-bottom: 2rem;
+.logo span {
+  font-weight: 800;
+  font-size: 1.5rem;
 }
 
-.save-btn {
-  width: 100%;
-  padding: 1rem;
-  background: #1f2937;
+.logo .green {
+  color: var(--primary-teal);
+}
+
+.logo .blue {
+  color: var(--primary-blue);
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.nav-links {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.nav-link {
+  background: transparent;
+  border: 1px solid transparent;
+  padding: 0.5rem 0.9rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #374151;
+}
+
+.nav-link.active {
+  background: #eef2ff;
+  border-color: #c7d2fe;
+  color: #1e3a8a;
+}
+
+.user-chip {
+  text-align: right;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.user-name {
+  font-weight: 600;
+  color: #111827;
+}
+
+.user-sub {
+  font-size: 0.75rem;
+}
+
+.logout-btn {
+  background: #ef4444;
   color: white;
   border: none;
-  border-radius: 10px;
-  font-weight: 600;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
   cursor: pointer;
-  font-size: 1rem;
+  font-weight: 600;
 }
 
-.empty-state { text-align: center; margin-top: 4rem; color: #9ca3af; }
-
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+.nav-muted {
+  color: #9ca3af;
+  font-weight: 600;
 }

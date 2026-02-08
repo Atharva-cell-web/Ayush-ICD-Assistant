@@ -1,61 +1,79 @@
-import { useState } from 'react';
-import axios from 'axios';
+import { useEffect, useState } from 'react';
 import Navbar from './components/Navbar';
-import SearchBar from './components/SearchBar';
-import ResultCard from './components/ResultCard';
+import SymptomChecker from './components/SymptomChecker';
+import PatientHistory from './components/PatientHistory';
+import AuthPage from './components/AuthPage';
+import api from './api';
 import './App.css';
 
 function App() {
-  const [query, setQuery] = useState('');
-  const [suggestions, setSuggestions] = useState([]);
-  const [selectedData, setSelectedData] = useState(null);
+  const [auth, setAuth] = useState({
+    token: localStorage.getItem('token'),
+    user: null
+  });
+  const [view, setView] = useState('vaidya');
+  const [loading, setLoading] = useState(true);
 
-  // Connects to your backend to find diseases
-  const handleSearch = async (e) => {
-    const val = e.target.value;
-    setQuery(val);
-    
-    if (val.length > 1) {
-      try {
-        const res = await axios.get(`http://localhost:5000/api/search?q=${val}`);
-        setSuggestions(res.data);
-      } catch (err) {
-        console.error("API Error - Is your backend server running?", err);
-      }
-    } else {
-      setSuggestions([]);
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setLoading(false);
+      return;
     }
+
+    api
+      .get('/api/auth/me')
+      .then(res => {
+        setAuth({ token, user: res.data.user });
+      })
+      .catch(() => {
+        localStorage.removeItem('token');
+        setAuth({ token: null, user: null });
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
+
+  const handleAuth = payload => {
+    localStorage.setItem('token', payload.token);
+    setAuth({ token: payload.token, user: payload.user });
+    setView('vaidya');
   };
 
-  // Handles clicking a dropdown item
-  const handleSelect = (disease) => {
-    setSelectedData(disease);
-    setSuggestions([]);
-    setQuery(''); // Clears search bar for a cleaner look
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setAuth({ token: null, user: null });
+    setView('vaidya');
   };
+
+  if (loading) {
+    return (
+      <div className="app-container">
+        <div className="page-loading">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="app-container">
-      <Navbar />
-      
-      <SearchBar 
-        query={query}
-        setQuery={setQuery}
-        handleSearch={handleSearch}
-        suggestions={suggestions}
-        handleSelect={handleSelect}
+      <Navbar
+        isAuthed={Boolean(auth.token)}
+        user={auth.user}
+        view={view}
+        onViewChange={setView}
+        onLogout={handleLogout}
       />
 
-      {/* Show the Result Card if data is selected, otherwise show welcome message */}
-      {selectedData ? (
-        <ResultCard 
-          data={selectedData} 
-          onSave={() => alert('✅ Patient Record Updated with Dual Codes')} 
-        />
+      {!auth.token ? (
+        <>
+          <AuthPage onAuth={handleAuth} />
+          <SymptomChecker doctor={null} isAuthed={false} />
+        </>
+      ) : view === 'history' ? (
+        <PatientHistory doctor={auth.user} />
       ) : (
-        <div className="empty-state">
-          <p>Start typing to map Traditional Medicine to Modern Standards</p>
-        </div>
+        <SymptomChecker doctor={auth.user} isAuthed />
       )}
     </div>
   );

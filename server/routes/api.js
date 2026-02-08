@@ -1,42 +1,56 @@
 const express = require('express');
 const router = express.Router();
-const Disease = require('../models/Disease');
+// Import the AI functions from your service
+const { searchWithAI, getDiagnosis } = require('../services/aiService');
 
 // @route   GET /api/search?q=...
-// @desc    Smart Search for Diseases
+// @desc    Real-Time AI Search (Generates results if DB is empty)
 router.get('/search', async (req, res) => {
   const query = req.query.q;
-  if (!query) return res.json([]);
+  
+  // 1. Validation: Don't search for empty strings or very short inputs
+  if (!query || query.length < 2) {
+    return res.json([]);
+  }
 
   try {
-    // Regex for partial matching (case-insensitive)
-    const results = await Disease.find({
-      diseaseName: { $regex: query, $options: 'i' }
-    }).limit(5);
+    console.log(`🔍 AI Searching for: ${query}`);
+    
+    // 2. Call the AI Search function
+    const results = await searchWithAI(query);
+    
+    // 3. Send results back to Frontend
     res.json(results);
+    
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error("Search Route Error:", err);
+    // Return empty array instead of crashing if AI fails
+    res.json([]); 
+  }
+});
+
+// @route   POST /api/diagnose
+// @desc    Detailed Symptom Checker (The "Diagnose Now" button)
+router.post('/diagnose', async (req, res) => {
+  const { symptoms } = req.body;
+  
+  if (!symptoms) {
+    return res.status(400).json({ error: "No symptoms provided" });
+  }
+
+  try {
+    const result = await getDiagnosis(symptoms);
+    res.json(result);
+  } catch (err) {
+    console.error("Diagnosis Route Error:", err);
+    res.status(500).json({ error: "Diagnosis failed" });
   }
 });
 
 // @route   POST /api/seed
-// @desc    Load dummy data (Run this once via Postman/Curl)
+// @desc    (Optional) Keep this if you still want to load dummy data later
 router.get('/seed', async (req, res) => {
-  const dummyData = [
-    { diseaseName: "Amavata", ayushCode: "AYU-001", icdCode: "FA00.0", description: "Rheumatoid Arthritis-like condition affecting joints.", confidenceScore: 95.8, category: "Ayurveda" },
-    { diseaseName: "Jwara", ayushCode: "AYU-024", icdCode: "MG26", description: "Acute fever or Pyrexia of unknown origin.", confidenceScore: 98.2, category: "Ayurveda" },
-    { diseaseName: "Kasa", ayushCode: "AYU-056", icdCode: "MD23", description: "Cough related to respiratory tract infection.", confidenceScore: 92.5, category: "Siddha" },
-    { diseaseName: "Tamaka Shwasa", ayushCode: "AYU-102", icdCode: "CA23", description: "Bronchial Asthma.", confidenceScore: 96.0, category: "Ayurveda" },
-    { diseaseName: "Madhumeha", ayushCode: "AYU-205", icdCode: "5A10", description: "Diabetes Mellitus Type 2.", confidenceScore: 99.1, category: "Ayurveda" }
-  ];
-  
-  try {
-    await Disease.deleteMany({}); // Clear old data
-    await Disease.insertMany(dummyData);
-    res.json({ message: "Database Seeded Successfully!" });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  res.json({ message: "Seeding is disabled in AI Mode." });
 });
 
 module.exports = router;
