@@ -13,17 +13,32 @@ const AuthPage = ({ onAuth }) => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [notice, setNotice] = useState(null);
 
   const updateField = field => event => {
     setForm(prev => ({ ...prev, [field]: event.target.value }));
+  };
+
+  const switchMode = nextMode => {
+    setMode(nextMode);
+    setError(null);
+    setNotice(null);
   };
 
   const handleSubmit = async event => {
     event.preventDefault();
     setLoading(true);
     setError(null);
+    setNotice(null);
 
     try {
+      if (mode === 'forgot') {
+        await api.post('/api/auth/forgot-password', { email: form.email });
+        setNotice('If the email exists, a reset link has been sent.');
+        setMode('login');
+        return;
+      }
+
       if (mode === 'login') {
         const res = await api.post('/api/auth/login', {
           email: form.email,
@@ -59,19 +74,23 @@ const AuthPage = ({ onAuth }) => {
         <div className="auth-toggle">
           <button
             className={mode === 'login' ? 'active' : ''}
-            onClick={() => setMode('login')}
+            onClick={() => switchMode('login')}
             type="button"
           >
             Login
           </button>
           <button
             className={mode === 'register' ? 'active' : ''}
-            onClick={() => setMode('register')}
+            onClick={() => switchMode('register')}
             type="button"
           >
             Register
           </button>
         </div>
+
+        {mode === 'forgot' && (
+          <div className="auth-hint">Enter your email to receive a password reset link.</div>
+        )}
 
         <form className="auth-form" onSubmit={handleSubmit}>
           {mode === 'register' && (
@@ -103,16 +122,42 @@ const AuthPage = ({ onAuth }) => {
             Email
             <input type="email" value={form.email} onChange={updateField('email')} required />
           </label>
-          <label>
-            Password
-            <input type="password" value={form.password} onChange={updateField('password')} required />
-          </label>
 
+          {mode !== 'forgot' && (
+            <label>
+              Password
+              <input
+                type="password"
+                value={form.password}
+                onChange={updateField('password')}
+                required
+              />
+            </label>
+          )}
+
+          {notice && <div className="auth-notice">{notice}</div>}
           {error && <div className="auth-error">{error}</div>}
 
           <button className="auth-button" type="submit" disabled={loading}>
-            {loading ? 'Please wait...' : mode === 'login' ? 'Login' : 'Create Account'}
+            {loading
+              ? 'Please wait...'
+              : mode === 'forgot'
+                ? 'Send Reset Link'
+                : mode === 'login'
+                  ? 'Login'
+                  : 'Create Account'}
           </button>
+
+          {mode === 'login' && (
+            <button className="auth-link" type="button" onClick={() => switchMode('forgot')}>
+              Forgot password?
+            </button>
+          )}
+          {mode === 'forgot' && (
+            <button className="auth-link" type="button" onClick={() => switchMode('login')}>
+              Back to login
+            </button>
+          )}
         </form>
       </div>
     </div>

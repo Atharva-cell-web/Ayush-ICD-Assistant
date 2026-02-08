@@ -6,7 +6,9 @@ const UserSchema = new mongoose.Schema(
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     passwordHash: { type: String, required: true },
     specialization: { type: String, default: 'Ayurveda Practitioner' },
-    hospitalName: { type: String, default: '' }
+    hospitalName: { type: String, default: '' },
+    resetTokenHash: String,
+    resetTokenExpires: Date
   },
   { timestamps: true }
 );

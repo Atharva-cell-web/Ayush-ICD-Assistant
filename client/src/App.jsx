@@ -3,6 +3,7 @@ import Navbar from './components/Navbar';
 import SymptomChecker from './components/SymptomChecker';
 import PatientHistory from './components/PatientHistory';
 import AuthPage from './components/AuthPage';
+import ResetPassword from './components/ResetPassword';
 import api from './api';
 import './App.css';
 
@@ -13,6 +14,10 @@ function App() {
   });
   const [view, setView] = useState('vaidya');
   const [loading, setLoading] = useState(true);
+  const [resetToken, setResetToken] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('resetToken');
+  });
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -47,10 +52,32 @@ function App() {
     setView('vaidya');
   };
 
+  const clearResetToken = () => {
+    const url = new URL(window.location.href);
+    url.searchParams.delete('resetToken');
+    window.history.replaceState({}, '', url);
+    setResetToken(null);
+  };
+
   if (loading) {
     return (
       <div className="app-container">
         <div className="page-loading">Loading...</div>
+      </div>
+    );
+  }
+
+  if (resetToken) {
+    return (
+      <div className="app-container">
+        <Navbar
+          isAuthed={false}
+          user={null}
+          view="vaidya"
+          onViewChange={() => {}}
+          onLogout={() => {}}
+        />
+        <ResetPassword token={resetToken} onDone={clearResetToken} />
       </div>
     );
   }
